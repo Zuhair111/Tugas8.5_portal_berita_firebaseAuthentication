@@ -11,10 +11,10 @@ class ApiConfig {
   static const String iosSimulator = 'http://127.0.0.1:8000/api/v1';
   
   // Untuk Physical Device (ganti dengan IP komputer Anda)
-  static const String physicalDevice = 'http://192.168.100.35/projekberita/projeklaravel1/public/api/v1';
+  static const String physicalDevice = 'http://192.168.100.203/projekberita%20-%20Firebase/projeklaravel1/public/api/v1';
   
-  // Base URL yang digunakan - untuk Chrome/Web browser
-  static const String baseUrl = laragonApache;
+  // Base URL yang digunakan - untuk Physical Device Android
+  static const String baseUrl = physicalDevice;
   
   // Timeout duration
   static const Duration timeoutDuration = Duration(seconds: 30);

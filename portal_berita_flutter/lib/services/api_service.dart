@@ -7,7 +7,7 @@ import '../config/api_config.dart';
 class ApiService {
   static String get baseUrl => ApiConfig.baseUrl;
   static Duration get timeoutDuration => ApiConfig.timeoutDuration;
-
+///mengambil data homepage
   Future<Map<String, dynamic>> getHomePage() async {
     try {
       print('🔍 API Request: $baseUrl/news');
@@ -42,7 +42,7 @@ class ApiService {
       throw Exception('Error: $e');
     }
   }
-
+///mengambil data kategori
   Future<List<Category>> getCategories() async {
     try {
       final response = await http.get(Uri.parse('$baseUrl/categories'));
@@ -59,7 +59,7 @@ class ApiService {
       throw Exception('Error: $e');
     }
   }
-
+///mengambil data artikel berdasarkan slug
   Future<Map<String, dynamic>> getArticle(String slug) async {
     try {
       final response = await http.get(Uri.parse('$baseUrl/article/$slug'));
@@ -79,7 +79,7 @@ class ApiService {
       throw Exception('Error: $e');
     }
   }
-
+///mencari data artikel
   Future<List<Article>> searchArticles(String query) async {
     try {
       final response = await http.get(
@@ -98,7 +98,7 @@ class ApiService {
       throw Exception('Error: $e');
     }
   }
-
+///mengambil data artikel berdasarkan kategori
   Future<List<Article>> getCategoryArticles(String slug) async {
     try {
       final response = await http.get(
@@ -122,7 +122,7 @@ class ApiService {
   Future<List<Article>> getArticlesByCategory(String slug) async {
     return getCategoryArticles(slug);
   }
-
+///mengambil data artikel trending
   Future<List<Article>> getTrendingArticles() async {
     try {
       final response = await http.get(Uri.parse('$baseUrl/trending'));

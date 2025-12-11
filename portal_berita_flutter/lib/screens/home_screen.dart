@@ -7,6 +7,7 @@ import 'article_detail_full_screen.dart';
 import 'login_screen.dart';
 import 'category_screen.dart';
 import 'search_screen.dart';
+import 'profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -90,6 +91,19 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 subtitle: Text(_userData!['email']),
               ),
               const Divider(),
+              ListTile(
+                leading: const Icon(Icons.person),
+                title: const Text('Profil Saya'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ProfileScreen(),
+                    ),
+                  ).then((_) => _checkLoginStatus()); // Refresh setelah kembali dari profil
+                },
+              ),
               ListTile(
                 leading: const Icon(Icons.logout, color: Colors.red),
                 title: const Text('Logout', style: TextStyle(color: Colors.red)),

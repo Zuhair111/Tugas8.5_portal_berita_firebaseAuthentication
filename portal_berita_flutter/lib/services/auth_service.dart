@@ -4,7 +4,7 @@ import '../models/user.dart';
 
 class AuthService {
   final firebase_auth.FirebaseAuth _firebaseAuth = firebase_auth.FirebaseAuth.instance;
-  
+  //fungsi login
   Future<Map<String, dynamic>> login(String email, String password) async {
     try {
       final credential = await _firebaseAuth.signInWithEmailAndPassword(
@@ -52,7 +52,7 @@ class AuthService {
       return {'success': false, 'message': 'Error: $e'};
     }
   }
-  
+  //fungsi register
   Future<Map<String, dynamic>> register(String name, String email, String password, String passwordConfirmation) async {
     try {
       if (password != passwordConfirmation) {
@@ -104,7 +104,7 @@ class AuthService {
       return {'success': false, 'message': 'Error: $e'};
     }
   }
-
+  //fungsi logout
   Future<void> logout() async {
     try {
       await _firebaseAuth.signOut();
@@ -115,11 +115,11 @@ class AuthService {
       print('Error logout: $e');
     }
   }
-
+ //cek status login
   Future<bool> isLoggedIn() async {
     return _firebaseAuth.currentUser != null;
   }
-
+//mengambil token
   Future<String?> getToken() async {
     final user = _firebaseAuth.currentUser;
     if (user != null) {
@@ -127,7 +127,7 @@ class AuthService {
     }
     return null;
   }
-
+//mengambil data user
   Future<Map<String, dynamic>?> getUserData() async {
     final user = _firebaseAuth.currentUser;
     
@@ -138,6 +138,127 @@ class AuthService {
       'name': user.displayName ?? 'User',
       'email': user.email ?? '',
     };
+  }
+
+  // UPDATE PROFILE
+  Future<Map<String, dynamic>> updateProfile({String? name}) async {
+    try {
+      final user = _firebaseAuth.currentUser;
+      
+      if (user == null) {
+        return {'success': false, 'message': 'User tidak ditemukan'};
+      }
+
+      // Update display name di Firebase
+      if (name != null && name.isNotEmpty) {
+        await user.updateDisplayName(name);
+        await user.reload();
+        
+        // Update di SharedPreferences
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('user_name', name);
+      }
+
+      return {
+        'success': true,
+        'message': 'Profil berhasil diperbarui',
+      };
+    } on firebase_auth.FirebaseAuthException catch (e) {
+      return {
+        'success': false,
+        'message': 'Gagal memperbarui profil: ${e.message}',
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Error: $e',
+      };
+    }
+  }
+
+  // CHANGE PASSWORD
+  Future<Map<String, dynamic>> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      final user = _firebaseAuth.currentUser;
+      
+      if (user == null || user.email == null) {
+        return {'success': false, 'message': 'User tidak ditemukan'};
+      }
+
+      // Re-authenticate dengan password lama
+      final credential = firebase_auth.EmailAuthProvider.credential(
+        email: user.email!,
+        password: currentPassword,
+      );
+
+      await user.reauthenticateWithCredential(credential);
+
+      // Update password
+      await user.updatePassword(newPassword);
+
+      return {
+        'success': true,
+        'message': 'Password berhasil diubah',
+      };
+    } on firebase_auth.FirebaseAuthException catch (e) {
+      String message = 'Gagal mengubah password';
+      
+      if (e.code == 'wrong-password') {
+        message = 'Password saat ini salah';
+      } else if (e.code == 'weak-password') {
+        message = 'Password baru terlalu lemah (minimal 6 karakter)';
+      } else if (e.code == 'requires-recent-login') {
+        message = 'Silakan login ulang untuk mengubah password';
+      } else if (e.code == 'invalid-credential') {
+        message = 'Password saat ini salah';
+      }
+      
+      return {'success': false, 'message': message};
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Error: $e',
+      };
+    }
+  }
+
+  // DELETE ACCOUNT
+  Future<Map<String, dynamic>> deleteAccount() async {
+    try {
+      final user = _firebaseAuth.currentUser;
+      
+      if (user == null) {
+        return {'success': false, 'message': 'User tidak ditemukan'};
+      }
+
+      // Hapus user dari Firebase
+      await user.delete();
+
+      // Clear local data
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+
+      return {
+        'success': true,
+        'message': 'Akun berhasil dihapus',
+      };
+    } on firebase_auth.FirebaseAuthException catch (e) {
+      String message = 'Gagal menghapus akun';
+      
+      if (e.code == 'requires-recent-login') {
+        message = 'Silakan login ulang untuk menghapus akun';
+      }
+      
+      return {'success': false, 'message': message};
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Error: $e',
+      };
+    }
   }
 
   firebase_auth.User? get currentUser => _firebaseAuth.currentUser;
